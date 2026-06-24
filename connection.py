@@ -24,5 +24,36 @@ def add():
     conn.close()
     return redirect(url_for('index'))
 
+@app.route('/create_account')
+def acct_create():
+    return render_template('create_acct.html')
+
+@app.route('/add_acct', methods=['POST'])
+def add_acct():
+    fname = request.form['fname']
+    lname = request.form['lname']
+    sx = request.form['sex']
+    height = request.form['height']
+    weight = request.form['weight']
+    email = request.form['email']
+    dob = request.form['birthday']
+    conn = mysql.connector.connect(**config)
+    mycursor = conn.cursor()
+#create a user with privilege level 'u' as default
+    insert_params = (fname,lname,email,dob,height,weight,'u')
+    
+    mycursor.execute("INSERT INTO Users (Fname, Lname, Email, Birthdate, Height, Weight, Privilege)"
+    "VALUES (%s,%s,%s,%s,%s,%s,%s)",insert_params)
+    #check that the addition was successful
+    conn.commit()
+    #get user ID
+    uid = mycursor.lastrowd
+    print("User created. ID: ", uid)
+    mycursor.close()
+    conn.close()
+    return redirect(url_for('user',userid = uid, uname = fname)) #placeholder for now, redirects to user page
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
