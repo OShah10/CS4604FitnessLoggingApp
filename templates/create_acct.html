@@ -5,19 +5,35 @@
     <title>Create an Account</title>
 </head>
 <body>
+    <h1>Create Account</h1>
+    
 <form action="/add_acct" method="post">
-    <input type="text" name = "fname" placeholder="Enter first name">
-    <input type="text" name="lname" placeholder="Enter last name">
-    <select id = "sex" name="sex" size="2">
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-        
-    </select>
-    <input type="number" name="height" placeholder="Enter height in cm">
-    <input type="number" name="weight" placeholder="Enter weight">
-    <input type="text" name="email" placeholder="Enter email address">
-    <input type ="date" name = "birthday" placeholder="Enter Date of Birth">
-    <input type = "submit" value="Submit">
+    <fieldset>
+        <legend>Account Info:</legend>
+        <label for ="fname">First Name</label><br>
+        <input type="text" name = "fname" placeholder="Enter first name">
+        <label for="lname">Last name</label><br>
+        <input type="text" name="lname" placeholder="Enter last name"><br>
+        <label for="lname">Sex</label><br>
+
+        <select id = "sex" name="sex" size="2">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            
+        </select>
+        <br>
+        <label for="height">Height</label><br>
+
+        <input type="number" name="height" placeholder="Enter height in cm"><br>
+        <label for="weight">Weight</label><br>
+        <input type="number" name="weight" placeholder="Enter weight"><br>
+        <label for="email">Email</label><br>
+        <input type="text" name="email" placeholder="Enter email address">
+        <label for="birthday">Date of Birth</label><br>
+        <input type ="date" name = "birthday" placeholder="Enter Date of Birth"><br>
+        <input type = "submit" value="Submit">
+    </fieldset>
+    
 </form>
 
 </body>

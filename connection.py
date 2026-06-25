@@ -53,7 +53,23 @@ def add_acct():
     conn.close()
     return redirect(url_for('user',userid = uid, uname = fname)) #placeholder for now, redirects to user page
 
-
+@app.route('/user_signin', methods = ['POST'])
+def sign():
+    data = request.form['email']
+    conn = mysql.connector.connect(**config)
+    cursed = conn.cursor()
+    #find a user with that specific email address
+    query = "SELECT UserID, Fname FROM USERS WHERE Email = %s"
+    cursed.execute(query, data)
+    #get results
+    results = cursed.fetchall()
+    if len(results) == 0:
+        print("User not found")
+        return render_template('user_sign.html')
+    else:
+        uid, fname = results[0]
+        return redirect(url_for('user',userid = uid, uname = fname))
+        
 
 if __name__ == '__main__':
     app.run(debug=True)
