@@ -27,6 +27,10 @@ def add():
 @app.route('/create_account')
 def acct_create():
     return render_template('create_acct.html')
+        
+@app.route('/user_sign')
+def usign():
+    return render_template('user_sign.html')
 
 @app.route('/add_acct', methods=['POST'])
 def add_acct():
@@ -51,10 +55,10 @@ def add_acct():
     print("User created. ID: ", uid)
     mycursor.close()
     conn.close()
-    return redirect(url_for('user',userid = uid, uname = fname)) #placeholder for now, redirects to user page
+    return redirect(url_for('user',userid = uid)) #placeholder for now, redirects to user page
 
 @app.route('/user_signin', methods = ['POST'])
-def sign():
+def signin():
     data = request.form['email']
     conn = mysql.connector.connect(**config)
     cursed = conn.cursor()
@@ -63,13 +67,19 @@ def sign():
     cursed.execute(query, data)
     #get results
     results = cursed.fetchall()
+    cursed.close()
+    conn.close()
     if len(results) == 0:
         print("User not found")
         return render_template('user_sign.html')
     else:
         uid, fname = results[0]
-        return redirect(url_for('user',userid = uid, uname = fname))
-        
+        return redirect(url_for('user',userid = uid))
+
+
+@app.route('/user/<userid>')
+def user(userid):
+    return redirect(url_for('user', userid = userid))
 
 if __name__ == '__main__':
     app.run(debug=True)
