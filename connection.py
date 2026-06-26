@@ -6,7 +6,8 @@ config = {
     'user': 'root',
     'password': '<insert your password here>',
     'host': 'localhost',
-    'database': 'healthtracker',
+    'port' : '3306',
+    'database': 'health_tracker'
 }
 
 @app.route('/')
@@ -51,20 +52,23 @@ def add_acct():
     #check that the addition was successful
     conn.commit()
     #get user ID
-    uid = mycursor.lastrowd
+    uid = mycursor.lastrowid
     print("User created. ID: ", uid)
     mycursor.close()
     conn.close()
     return redirect(url_for('user',userid = uid)) #placeholder for now, redirects to user page
 
-@app.route('/user_signin', methods = ['POST'])
+@app.route('/user_signin')
 def signin():
-    data = request.form['email']
+    print("arguments:", request.args)
+    data = request.args['email']
+    print("email:", data)
     conn = mysql.connector.connect(**config)
     cursed = conn.cursor()
     #find a user with that specific email address
+    params = (data,)
     query = "SELECT UserID, Fname FROM USERS WHERE Email = %s"
-    cursed.execute(query, data)
+    cursed.execute(query, params)
     #get results
     results = cursed.fetchall()
     cursed.close()
@@ -74,12 +78,14 @@ def signin():
         return render_template('user_sign.html')
     else:
         uid, fname = results[0]
+        print("Found user")
         return redirect(url_for('user',userid = uid))
 
 
 @app.route('/user/<userid>')
 def user(userid):
-    return redirect(url_for('user', userid = userid))
+    print("At user route")
+    return render_template('user.html', uid = userid)
 
 if __name__ == '__main__':
     app.run(debug=True)
