@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 config = {
     'user': 'root',
-    'password': '<insert your password here>',
+    'password': 'YouWontPass',
     'host': 'localhost',
     'port' : '3306',
     'database': 'health_tracker'
@@ -310,11 +310,7 @@ def get_user():
     return render_template('user_admin.html',
                            uid=admin_uid,
                            user_info=user_info,
-                           meals=meals,
-                           exercises=exercises,
-                           usercnt=num_users,
-                           user_search_result=search_result,
-                           searched_uid=target_uid)
+                           meals=meals,exercises=exercises,usercnt=num_users,user_search_result=search_result,searched_uid=target_uid)
 
 
 @app.route('/user/<userid>')
@@ -341,6 +337,9 @@ def user(userid):
     
     return render_template('user.html', uid=userid, user_info=user_info, meals=meals, exercises=exercises)
     
+@app.route('/admin/manage_users/<userid>')
+def manage_users(userid):
+    return render_template('manage_users.html', uid = userid)
 
 if __name__ == '__main__':
     app.run(debug=True)

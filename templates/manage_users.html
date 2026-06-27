@@ -1,4 +1,20 @@
 <!DOCTYPE html>
 <html>
-    
-</html>
+<head>
+    <title>Manage Users</title>
+</head>
+<body>
+    <h1>User Management</h1>
+    <div id = "UserDeletion">
+        <form method="post">
+            <legend>Delete a User by UserID</legend>
+        </form>
+    </div>
+    <div id="AdminUserCreation">
+        <form method="post">
+            
+        </form>
+    </div>
+    <a href="{{ url_for('admin', userid=uid) }}">Back to Profile</a>
+
+</body>
