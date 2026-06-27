@@ -202,9 +202,9 @@ def get_user():
     cursor.close()
     conn.close()
     newconn = mysql.connector.connect(**config)
-    newcursor = conn.cursor()
+    newcursor = newconn.cursor()
     newcursor.execute("SELECT COUNT(*) FROM Users")
-    num_users = cursor.fetchone()
+    num_users = newcursor.fetchone()
     newcursor.close()
     newconn.close()
 
