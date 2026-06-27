@@ -68,6 +68,7 @@
         {% endif %}
 
         <div class="button-row">
+            <a href="{{ url_for('edit_user', userid=uid) }}"><button type="button">Edit User Info</button></a>
             <a href="{{ url_for('log_meal', userid=uid) }}"><button type="button">Log a Meal</button></a>
             <a href="{{ url_for('log_exercise', userid=uid) }}"><button type="button">Log an Exercise</button></a>
         </div>
@@ -91,6 +92,7 @@
                 <td>{{ meal.Timestamp }}</td>
                 <td>{{ meal.Calories }}</td>
                 <td>{{ meal.Notes }}</td>
+                <td><a href="{{ url_for('edit_meal', foodid=meal.FoodID) }}"><button type="button">Edit</button></a></td>
             </tr>
             {% endfor %}
         </table>
@@ -123,6 +125,7 @@
                 <td>{{ ex.Effort_Rating }}</td>
                 <td>{{ "Yes" if ex.Done else "No" }}</td>
                 <td>{{ ex.Notes }}</td>
+                <td><a href="{{ url_for('edit_exercise', exerciseid=ex.ExerciseID) }}"><button type="button">Edit</button></a></td>
             </tr>
             {% endfor %}
         </table>

@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 config = {
     'user': 'root',
-    'password': 'YouWontPass',
+    'password': '<insert your password here>',
     'host': 'localhost',
     'port' : '3306',
     'database': 'health_tracker'
@@ -103,6 +103,39 @@ def add_acct():
     return redirect(url_for('user',userid = uid)) #placeholder for now, redirects to user page
 
 
+@app.route('/edit_user/<userid>')
+def edit_user(userid):
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Users WHERE UserID = %s", (userid,))
+    user_info = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return render_template('edit_user.html', uid=userid, user_info=user_info)
+
+
+@app.route('/update_user/<userid>', methods=['POST'])
+def update_user(userid):
+    fname = request.form['fname']
+    lname = request.form['lname']
+    email = request.form['email']
+    birthdate = request.form['birthdate']
+    height = request.form['height']
+    weight = request.form['weight']
+    privilege = request.form['privilege']
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE Users SET Fname=%s, Lname=%s, Email=%s, Birthdate=%s, Height=%s, Weight=%s, Privilege=%s "
+        "WHERE UserID=%s",
+        (fname, lname, email, birthdate, height, weight, privilege, userid)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('user', userid=userid))
+
+
 
 @app.route('/log_meal/<userid>')
 def log_meal(userid):
@@ -119,6 +152,37 @@ def add_meal(userid):
     cursor.execute(
         "INSERT INTO Meals (UserID, Name, Calories, Notes) VALUES (%s, %s, %s, %s)",
         (userid, name, calories, notes)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('user', userid=userid))
+
+
+@app.route('/edit_meal/<foodid>')
+def edit_meal(foodid):
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Meals WHERE FoodID = %s", (foodid,))
+    meal = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return render_template('edit_meal.html', meal=meal)
+
+
+@app.route('/update_meal/<foodid>', methods=['POST'])
+def update_meal(foodid):
+    name = request.form['name']
+    calories = request.form['calories']
+    notes = request.form['notes']
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+    # get UserID first so we know where to redirect
+    cursor.execute("SELECT UserID FROM Meals WHERE FoodID = %s", (foodid,))
+    userid = cursor.fetchone()[0]
+    cursor.execute(
+        "UPDATE Meals SET Name=%s, Calories=%s, Notes=%s WHERE FoodID=%s",
+        (name, calories, notes, foodid)
     )
     conn.commit()
     cursor.close()
@@ -145,6 +209,41 @@ def add_exercise(userid):
         "INSERT INTO Exercises (UserID, Name, Calories_Burned, Duration, Effort_Rating, Done, Notes) "
         "VALUES (%s, %s, %s, %s, %s, %s, %s)",
         (userid, name, calories_burned, duration, effort_rating, done, notes)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('user', userid=userid))
+
+
+@app.route('/edit_exercise/<exerciseid>')
+def edit_exercise(exerciseid):
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Exercises WHERE ExerciseID = %s", (exerciseid,))
+    exercise = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return render_template('edit_exercise.html', exercise=exercise)
+
+
+@app.route('/update_exercise/<exerciseid>', methods=['POST'])
+def update_exercise(exerciseid):
+    name = request.form['name']
+    calories_burned = request.form['calories_burned']
+    duration = request.form['duration']
+    effort_rating = request.form['effort_rating']
+    done = request.form['done']
+    notes = request.form['notes']
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+    # get UserID first so we know where to redirect
+    cursor.execute("SELECT UserID FROM Exercises WHERE ExerciseID = %s", (exerciseid,))
+    userid = cursor.fetchone()[0]
+    cursor.execute(
+        "UPDATE Exercises SET Name=%s, Calories_Burned=%s, Duration=%s, Effort_Rating=%s, Done=%s, Notes=%s "
+        "WHERE ExerciseID=%s",
+        (name, calories_burned, duration, effort_rating, done, notes, exerciseid)
     )
     conn.commit()
     cursor.close()
