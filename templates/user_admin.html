@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Profile Page</title>
+
+</head>
+<body>
+    <div>
+        <h2>Overview</h2>
+        {% if user_info %}
+        <table id="overviewTable">
+            <tr><th>User ID</th><td>{{ uid }}</td></tr>
+            <tr><th>First Name</th><td>{{ user_info.Fname }}</td></tr>
+            <tr><th>Last Name</th><td>{{ user_info.Lname }}</td></tr>
+            <tr><th>Email</th><td>{{ user_info.Email }}</td></tr>
+            <tr><th>Birthdate</th><td>{{ user_info.Birthdate }}</td></tr>
+            <tr><th>Height</th><td>{{ user_info.Height }}</td></tr>
+            <tr><th>Weight</th><td>{{ user_info.Weight }}</td></tr>
+        </table>
+        {% else %}
+        <p class="empty-message">No user found with ID {{ uid }}.</p>
+        {% endif %}
+
+        <div>
+            <h3>Find a user</h3>
+            <form action = "/get_user" method ="post">
+                <input type = "number" name = "uid" placeholder="Enter User ID">
+                <input type = "submit" value="Submit">
+
+            </form>
+            {% if user_search_result %}
+            <table id="tgtUserInfo">
+                <tr><th>User ID </th> <th>First Name</th> <th>Last Name</th><th></th><th>Email</th><th>DOB</th><th>Height</th><th>Weight</th><th>Privilege Level</th></tr>
+                <tr><td>{{ searched_uid }}</td>{{ user_search_result.Fname }} <td>
+                    {{ user_search_result.Lname }}</td><td>{{ user_search_result.Email }}</td><td>{{ user_search_result.Birthdate }}</td>
+                <td>{{ user_search_result.Height }}</td><td>{{ user_search_result.Weight }}</td><td>{{ user_search_result.Privilege }}</td></tr>
+            </table>
+            {% else %}
+            <p></p>
+            {% endif %}
+        </div>
+        <div>
+
+        </div>
+    </div>
+</body>
+</html>

@@ -1,14 +1,15 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 import mysql.connector
 app = Flask(__name__)
 
 config = {
     'user': 'root',
-    'password': '<insert your password here>',
+    'password': 'YouWontPass',
     'host': 'localhost',
     'port' : '3306',
     'database': 'health_tracker'
 }
+app.secret_key = 'secretKey'
 
 @app.route('/')
 def index():
@@ -29,8 +30,51 @@ def add():
 def acct_create():
     return render_template('create_acct.html')
         
-@app.route('/user_sign')
-def usign():
+@app.route('/user_sign',  methods=['GET','POST'])
+def user_sign():
+    error = None
+    if request.method == 'POST':
+        email = request.form['email']
+        userid = request.form['user_id']
+              
+        conn = mysql.connector.connect(**config)
+        cursed = conn.cursor()
+        params = ()
+        query = ""
+        used_email = False
+        used_uid = False
+        if email != '':
+
+        #find a user with that specific email address
+            params = (email,)
+            query = "SELECT UserID, Fname, Privilege FROM users WHERE Email = %s"
+            used_email = True
+        elif userid != '':
+            params = (int(userid),)
+            query = "SELECT UserID, Fname, Privilege FROM users WHERE UserID = %s"
+            used_uid = True
+        else:
+            flash("No user ID or Email provided")
+            return render_template('user_sign.html')
+            
+        cursed.execute(query, params)
+        #get results
+        results = cursed.fetchall()
+        cursed.close()
+        conn.close()
+        if len(results) == 0:
+            print("User not found")
+            if used_email:
+                flash("Incorrect Email")
+            if used_uid:
+                flash("Incorrect User ID")
+        else:
+            uid, fname, user_privilege = results[0]
+
+            if user_privilege == 'a':
+                return redirect(url_for('admin',userid=uid))
+            
+            return redirect(url_for('user',userid = uid))
     return render_template('user_sign.html')
 
 @app.route('/add_acct', methods=['POST'])
@@ -47,7 +91,7 @@ def add_acct():
 #create a user with privilege level 'u' as default
     insert_params = (fname,lname,email,dob,height,weight,'u')
     
-    mycursor.execute("INSERT INTO Users (Fname, Lname, Email, Birthdate, Height, Weight, Privilege)"
+    mycursor.execute("INSERT INTO users (Fname, Lname, Email, Birthdate, Height, Weight, Privilege)"
     "VALUES (%s,%s,%s,%s,%s,%s,%s)",insert_params)
     #check that the addition was successful
     conn.commit()
@@ -58,28 +102,6 @@ def add_acct():
     conn.close()
     return redirect(url_for('user',userid = uid)) #placeholder for now, redirects to user page
 
-@app.route('/user_signin')
-def signin():
-    print("arguments:", request.args)
-    data = request.args['email']
-    print("email:", data)
-    conn = mysql.connector.connect(**config)
-    cursed = conn.cursor()
-    #find a user with that specific email address
-    params = (data,)
-    query = "SELECT UserID, Fname FROM USERS WHERE Email = %s"
-    cursed.execute(query, params)
-    #get results
-    results = cursed.fetchall()
-    cursed.close()
-    conn.close()
-    if len(results) == 0:
-        print("User not found")
-        return render_template('user_sign.html')
-    else:
-        uid, fname = results[0]
-        print("Found user")
-        return redirect(url_for('user',userid = uid))
 
 
 @app.route('/log_meal/<userid>')
@@ -129,6 +151,72 @@ def add_exercise(userid):
     conn.close()
     return redirect(url_for('user', userid=userid))
 
+@app.route('/admin/<userid>')
+def admin(userid):
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor(dictionary=True)
+    # get user info
+    cursor.execute("SELECT * FROM Users WHERE UserID = %s", (userid,))
+    user_info = cursor.fetchone()
+    user_privilege = user_info["Privilege"]
+    # get meal logs for this user
+    cursor.execute("SELECT * FROM Meals WHERE UserID = %s ORDER BY Timestamp DESC", (userid,))
+    meals = cursor.fetchall()
+    # get exercise logs for this user
+    cursor.execute("SELECT * FROM Exercises WHERE UserID = %s ORDER BY Timestamp DESC", (userid,))
+    exercises = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM Users")
+    num_users = cursor.fetchone() #get the total number of users
+    cursor.close()
+    conn.close()
+    return render_template('user_admin.html', uid=userid, user_info=user_info, meals=meals, 
+                           exercises=exercises, usercnt = num_users,
+                           user_search_result = None,
+                           searched_uid = None)
+
+
+@app.route('/get_user', methods=['POST'])
+def get_user():
+    target_uid = request.form['uid']
+    admin_uid = request.form['admin_uid']
+
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM Users WHERE UserID = %s", (admin_uid,))
+    user_info = cursor.fetchone()
+
+    cursor.execute("SELECT * FROM Meals WHERE UserID = %s ORDER BY Timestamp DESC", (admin_uid,))
+    meals = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM Exercises WHERE UserID = %s ORDER BY Timestamp DESC", (admin_uid,))
+    exercises = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM Users WHERE UserID = %s", (target_uid,))
+    search_result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    newconn = mysql.connector.connect(**config)
+    newcursor = conn.cursor()
+    newcursor.execute("SELECT COUNT(*) FROM Users")
+    num_users = cursor.fetchone()
+    newcursor.close()
+    newconn.close()
+
+    return render_template('user_admin.html',
+                           uid=admin_uid,
+                           user_info=user_info,
+                           meals=meals,
+                           exercises=exercises,
+                           usercnt=num_users,
+                           user_search_result=search_result,
+                           searched_uid=target_uid)
+
 
 @app.route('/user/<userid>')
 def user(userid):
@@ -139,6 +227,7 @@ def user(userid):
     # get user info
     cursor.execute("SELECT * FROM Users WHERE UserID = %s", (userid,))
     user_info = cursor.fetchone()
+    user_privilege = user_info["Privilege"]
 
     # get meal logs for this user
     cursor.execute("SELECT * FROM Meals WHERE UserID = %s ORDER BY Timestamp DESC", (userid,))
@@ -150,8 +239,9 @@ def user(userid):
 
     cursor.close()
     conn.close()
-
+    
     return render_template('user.html', uid=userid, user_info=user_info, meals=meals, exercises=exercises)
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
