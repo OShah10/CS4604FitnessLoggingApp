@@ -82,10 +82,76 @@ def signin():
         return redirect(url_for('user',userid = uid))
 
 
+@app.route('/log_meal/<userid>')
+def log_meal(userid):
+    return render_template('log_meal.html', uid=userid)
+
+
+@app.route('/add_meal/<userid>', methods=['POST'])
+def add_meal(userid):
+    name = request.form['name']
+    calories = request.form['calories']
+    notes = request.form['notes']
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO Meals (UserID, Name, Calories, Notes) VALUES (%s, %s, %s, %s)",
+        (userid, name, calories, notes)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('user', userid=userid))
+
+
+@app.route('/log_exercise/<userid>')
+def log_exercise(userid):
+    return render_template('log_exercise.html', uid=userid)
+
+
+@app.route('/add_exercise/<userid>', methods=['POST'])
+def add_exercise(userid):
+    name = request.form['name']
+    calories_burned = request.form['calories_burned']
+    duration = request.form['duration']
+    effort_rating = request.form['effort_rating']
+    done = request.form['done']
+    notes = request.form['notes']
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO Exercises (UserID, Name, Calories_Burned, Duration, Effort_Rating, Done, Notes) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+        (userid, name, calories_burned, duration, effort_rating, done, notes)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('user', userid=userid))
+
+
 @app.route('/user/<userid>')
 def user(userid):
     print("At user route")
-    return render_template('user.html', uid = userid)
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor(dictionary=True)
+
+    # get user info
+    cursor.execute("SELECT * FROM Users WHERE UserID = %s", (userid,))
+    user_info = cursor.fetchone()
+
+    # get meal logs for this user
+    cursor.execute("SELECT * FROM Meals WHERE UserID = %s ORDER BY Timestamp DESC", (userid,))
+    meals = cursor.fetchall()
+
+    # get exercise logs for this user
+    cursor.execute("SELECT * FROM Exercises WHERE UserID = %s ORDER BY Timestamp DESC", (userid,))
+    exercises = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('user.html', uid=userid, user_info=user_info, meals=meals, exercises=exercises)
 
 if __name__ == '__main__':
     app.run(debug=True)
