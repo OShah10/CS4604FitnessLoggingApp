@@ -2,15 +2,21 @@
 <html lang="en">
     <head>
     <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Verdana, Tahoma, sans-serif;
+        }
+    </style>
     <title>Sign in</title>
 </head>
 <body>
     <h1>Sign In</h1>
     <form action="/user_signin" method="get">
         <fieldset>
-            <legend>Please sign in:</legend>
+            <legend>Please enter Email or Account number:</legend>
             <label for ="email">Email Address</label><br>
             <input type="text" name="email" placeholder="Enter email address"><br>
+            <input type = "number" name = "acct_num" placeholder="Enter Account Number"><br>
             <input type = "submit" value="Submit">
 
         </fieldset>
