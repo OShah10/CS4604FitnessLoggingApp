@@ -5,16 +5,51 @@
 </head>
 <body>
     <h1>User Management</h1>
-    <div id = "UserDeletion">
-        <form method="post">
-            <legend>Delete a User by UserID</legend>
+
+    <div id="UserDeletion">
+        <form method="post" action="{{ url_for('delete_user') }}">
+            <fieldset>
+                <legend>Delete a User by UserID</legend>
+
+                <label for="delete_userid">User ID:</label>
+                <input type="number" id="delete_userid" name="userid" required>
+
+                <button type="submit">Delete User</button>
+            </fieldset>
         </form>
     </div>
+
+    <br>
+
     <div id="AdminUserCreation">
-        <form method="post">
-            
+        <form method="post" action="{{ url_for('admin_create_user') }}">
+            <fieldset>
+                <legend>Create New User</legend>
+
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <br><br>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <br><br>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <br><br>
+
+                <label for="is_admin">Admin?</label>
+                <input type="checkbox" id="is_admin" name="is_admin" value="1">
+                <br><br>
+
+                <button type="submit">Create User</button>
+            </fieldset>
         </form>
     </div>
+
+    <br>
+
     <a href="{{ url_for('admin', userid=uid) }}">Back to Profile</a>
 
 </body>
+</html>
