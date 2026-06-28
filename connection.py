@@ -4,9 +4,9 @@ app = Flask(__name__)
 
 config = {
     'user': 'root',
-    'password': '<insert your password here>',
+    'password': 'AllisonMayaSierra2425!',
     'host': 'localhost',
-    'port' : '3306',
+    'port': '3306',
     'database': 'health_tracker'
 }
 app.secret_key = 'secretKey'
@@ -29,14 +29,14 @@ def add():
 @app.route('/create_account')
 def acct_create():
     return render_template('create_acct.html')
-        
-@app.route('/user_sign',  methods=['GET','POST'])
+
+@app.route('/user_sign', methods=['GET', 'POST'])
 def user_sign():
     error = None
     if request.method == 'POST':
         email = request.form['email']
         userid = request.form['user_id']
-              
+
         conn = mysql.connector.connect(**config)
         cursed = conn.cursor()
         params = ()
@@ -45,7 +45,7 @@ def user_sign():
         used_uid = False
         if email != '':
 
-        #find a user with that specific email address
+            # find a user with that specific email address
             params = (email,)
             query = "SELECT UserID, Fname, Privilege FROM users WHERE Email = %s"
             used_email = True
@@ -56,9 +56,9 @@ def user_sign():
         else:
             flash("No user ID or Email provided")
             return render_template('user_sign.html')
-            
+
         cursed.execute(query, params)
-        #get results
+        # get results
         results = cursed.fetchall()
         cursed.close()
         conn.close()
@@ -72,9 +72,9 @@ def user_sign():
             uid, fname, user_privilege = results[0]
 
             if user_privilege == 'a':
-                return redirect(url_for('admin',userid=uid))
-            
-            return redirect(url_for('user',userid = uid))
+                return redirect(url_for('admin', userid=uid))
+
+            return redirect(url_for('user', userid=uid))
     return render_template('user_sign.html')
 
 @app.route('/add_acct', methods=['POST'])
@@ -88,19 +88,19 @@ def add_acct():
     dob = request.form['birthday']
     conn = mysql.connector.connect(**config)
     mycursor = conn.cursor()
-#create a user with privilege level 'u' as default
-    insert_params = (fname,lname,email,dob,height,weight,'u')
-    
+    # create a user with privilege level 'u' as default
+    insert_params = (fname, lname, email, dob, height, weight, 'u')
+
     mycursor.execute("INSERT INTO users (Fname, Lname, Email, Birthdate, Height, Weight, Privilege)"
-    "VALUES (%s,%s,%s,%s,%s,%s,%s)",insert_params)
-    #check that the addition was successful
+                     "VALUES (%s,%s,%s,%s,%s,%s,%s)", insert_params)
+    # check that the addition was successful
     conn.commit()
-    #get user ID
+    # get user ID
     uid = mycursor.lastrowid
     print("User created. ID: ", uid)
     mycursor.close()
     conn.close()
-    return redirect(url_for('user',userid = uid)) #placeholder for now, redirects to user page
+    return redirect(url_for('user', userid=uid))  # placeholder for now, redirects to user page
 
 
 @app.route('/edit_user/<userid>')
@@ -119,12 +119,17 @@ def delete_other_user():
     userid = request.form['user_id']
     myconn = mysql.connector.connect(**config)
     mycursor = myconn.cursor()
+    # delete related records first to avoid foreign key constraint errors
+    mycursor.execute("DELETE FROM Nutrients WHERE FoodID IN (SELECT FoodID FROM Meals WHERE UserID = %s)", (int(userid),))
+    mycursor.execute("DELETE FROM Meals WHERE UserID = %s", (int(userid),))
+    mycursor.execute("DELETE FROM Exercises WHERE UserID = %s", (int(userid),))
+    mycursor.execute("DELETE FROM Goals WHERE UserID = %s", (int(userid),))
     mycursor.execute("DELETE FROM Users WHERE UserID = %s", (int(userid),))
     myconn.commit()
     mycursor.close()
     myconn.close()
 
-    return redirect(url_for('manage_users', userid = admin_uid))
+    return redirect(url_for('manage_users', userid=admin_uid))
 
 @app.route('/update_user/<userid>', methods=['POST'])
 def update_user(userid):
@@ -146,7 +151,6 @@ def update_user(userid):
     cursor.close()
     conn.close()
     return redirect(url_for('user', userid=userid))
-
 
 
 @app.route('/log_meal/<userid>')
@@ -228,21 +232,21 @@ def add_exercise(userid):
     return redirect(url_for('user', userid=userid))
 
 @app.route('/remove_exercise/<userid>/<exerciseid>')
-def remove_exercise( userid,exerciseid):
+def remove_exercise(userid, exerciseid):
     print("at remove_exercise")
     myconn = mysql.connector.connect(**config)
     mycursor = myconn.cursor()
     mycursor.execute("SELECT * FROM Exercises WHERE ExerciseID = %s", (exerciseid,))
     result = mycursor.fetchone()
-    #run delete query
+    # run delete query
     mycursor.execute("DELETE FROM Exercises WHERE ExerciseID = %s", (exerciseid,))
-    
+
     mycursor.execute("SELECT * FROM Exercises WHERE ExerciseID = %s", (exerciseid,))
     deletionResult = mycursor.fetchone()
     myconn.commit()
     mycursor.close()
     myconn.close()
-    return redirect(url_for('user', userid = userid))
+    return redirect(url_for('user', userid=userid))
 
 @app.route('/delete_meal/<userid>/<foodid>')
 def delete_meal(userid, foodid):
@@ -251,15 +255,15 @@ def delete_meal(userid, foodid):
     mycursor = myconn.cursor()
     mycursor.execute("SELECT * FROM Meals WHERE FoodID = %s", (foodid,))
     result = mycursor.fetchone()
-    #run delete query
+    mycursor.execute("DELETE FROM Nutrients WHERE FoodID = %s", (foodid,))
     mycursor.execute("DELETE FROM Meals WHERE FoodID = %s", (foodid,))
-    
+
     mycursor.execute("SELECT * FROM Meals WHERE FoodID = %s", (foodid,))
     deletionResult = mycursor.fetchone()
     myconn.commit()
     mycursor.close()
     myconn.close()
-    return redirect(url_for('user', userid = userid))
+    return redirect(url_for('user', userid=userid))
 
 @app.route('/edit_exercise/<exerciseid>')
 def edit_exercise(exerciseid):
@@ -315,13 +319,13 @@ def admin(userid):
     conn = mysql.connector.connect(**config)
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM Users")
-    num_users = cursor.fetchone() #get the total number of users
+    num_users = cursor.fetchone()  # get the total number of users
     cursor.close()
     conn.close()
-    return render_template('user_admin.html', uid=userid, user_info=user_info, meals=meals, 
-                           exercises=exercises, usercnt = num_users,
-                           user_search_result = None,
-                           searched_uid = None)
+    return render_template('user_admin.html', uid=userid, user_info=user_info, meals=meals,
+                           exercises=exercises, usercnt=num_users,
+                           user_search_result=None,
+                           searched_uid=None)
 
 
 @app.route('/get_user', methods=['POST'])
@@ -357,8 +361,25 @@ def get_user():
     return render_template('user_admin.html',
                            uid=admin_uid,
                            user_info=user_info,
-                           meals=meals,exercises=exercises,usercnt=num_users,user_search_result=search_result,searched_uid=target_uid)
+                           meals=meals, exercises=exercises, usercnt=num_users, user_search_result=search_result,
+                           searched_uid=target_uid)
 
+
+@app.route('/delete_user/<userid>')
+def delete_user(userid):
+    print("At delete_user")
+    myconn = mysql.connector.connect(**config)
+    mycursor = myconn.cursor()
+    # delete related records first to avoid foreign key constraint errors
+    mycursor.execute("DELETE FROM Nutrients WHERE FoodID IN (SELECT FoodID FROM Meals WHERE UserID = %s)", (userid,))
+    mycursor.execute("DELETE FROM Meals WHERE UserID = %s", (userid,))
+    mycursor.execute("DELETE FROM Exercises WHERE UserID = %s", (userid,))
+    mycursor.execute("DELETE FROM Goals WHERE UserID = %s", (userid,))
+    mycursor.execute("DELETE FROM Users WHERE UserID = %s", (userid,))
+    myconn.commit()
+    mycursor.close()
+    myconn.close()
+    return redirect(url_for('index'))
 
 @app.route('/user/<userid>')
 def user(userid):
@@ -381,12 +402,12 @@ def user(userid):
 
     cursor.close()
     conn.close()
-    
+
     return render_template('user.html', uid=userid, user_info=user_info, meals=meals, exercises=exercises)
-    
+
 @app.route('/admin/manage_users/<userid>')
 def manage_users(userid):
-    return render_template('manage_users.html', uid = userid)
+    return render_template('manage_users.html', uid=userid)
 
 if __name__ == '__main__':
     app.run(debug=True)
