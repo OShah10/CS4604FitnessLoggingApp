@@ -93,6 +93,8 @@
                 <td>{{ meal.Calories }}</td>
                 <td>{{ meal.Notes }}</td>
                 <td><a href="{{ url_for('edit_meal', foodid=meal.FoodID) }}"><button type="button">Edit</button></a></td>
+                <td><a href="{{ url_for('delete_meal', foodid=meal.FoodID, userid=uid) }}"><button type="button">Delete</button></a></td>
+
             </tr>
             {% endfor %}
         </table>
@@ -126,6 +128,7 @@
                 <td>{{ "Yes" if ex.Done else "No" }}</td>
                 <td>{{ ex.Notes }}</td>
                 <td><a href="{{ url_for('edit_exercise', exerciseid=ex.ExerciseID) }}"><button type="button">Edit</button></a></td>
+                <td><a href="{{ url_for('remove_exercise', exerciseid=ex.ExerciseID, userid = uid) }}"><button type="button">Delete</button></a></td>
             </tr>
             {% endfor %}
         </table>

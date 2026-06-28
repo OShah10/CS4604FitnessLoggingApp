@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 config = {
     'user': 'root',
-    'password': 'YouWontPass',
+    'password': '<insert your password here>',
     'host': 'localhost',
     'port' : '3306',
     'database': 'health_tracker'
@@ -113,6 +113,18 @@ def edit_user(userid):
     conn.close()
     return render_template('edit_user.html', uid=userid, user_info=user_info)
 
+@app.route('/delete_other_user', methods=['POST'])
+def delete_other_user():
+    admin_uid = request.form['admin_uid']
+    userid = request.form['user_id']
+    myconn = mysql.connector.connect(**config)
+    mycursor = myconn.cursor()
+    mycursor.execute("DELETE FROM Users WHERE UserID = %s", (int(userid),))
+    myconn.commit()
+    mycursor.close()
+    myconn.close()
+
+    return redirect(url_for('manage_users', userid = admin_uid))
 
 @app.route('/update_user/<userid>', methods=['POST'])
 def update_user(userid):
@@ -215,6 +227,39 @@ def add_exercise(userid):
     conn.close()
     return redirect(url_for('user', userid=userid))
 
+@app.route('/remove_exercise/<userid>/<exerciseid>')
+def remove_exercise( userid,exerciseid):
+    print("at remove_exercise")
+    myconn = mysql.connector.connect(**config)
+    mycursor = myconn.cursor()
+    mycursor.execute("SELECT * FROM Exercises WHERE ExerciseID = %s", (exerciseid,))
+    result = mycursor.fetchone()
+    #run delete query
+    mycursor.execute("DELETE FROM Exercises WHERE ExerciseID = %s", (exerciseid,))
+    
+    mycursor.execute("SELECT * FROM Exercises WHERE ExerciseID = %s", (exerciseid,))
+    deletionResult = mycursor.fetchone()
+    myconn.commit()
+    mycursor.close()
+    myconn.close()
+    return redirect(url_for('user', userid = userid))
+
+@app.route('/delete_meal/<userid>/<foodid>')
+def delete_meal(userid, foodid):
+    print("At delete_meal")
+    myconn = mysql.connector.connect(**config)
+    mycursor = myconn.cursor()
+    mycursor.execute("SELECT * FROM Meals WHERE FoodID = %s", (foodid,))
+    result = mycursor.fetchone()
+    #run delete query
+    mycursor.execute("DELETE FROM Meals WHERE FoodID = %s", (foodid,))
+    
+    mycursor.execute("SELECT * FROM Meals WHERE FoodID = %s", (foodid,))
+    deletionResult = mycursor.fetchone()
+    myconn.commit()
+    mycursor.close()
+    myconn.close()
+    return redirect(url_for('user', userid = userid))
 
 @app.route('/edit_exercise/<exerciseid>')
 def edit_exercise(exerciseid):
@@ -298,6 +343,8 @@ def get_user():
 
     cursor.execute("SELECT * FROM Users WHERE UserID = %s", (target_uid,))
     search_result = cursor.fetchone()
+    if search_result is None:
+        flash("User with that ID not Found")
     cursor.close()
     conn.close()
     newconn = mysql.connector.connect(**config)

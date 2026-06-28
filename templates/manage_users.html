@@ -6,8 +6,12 @@
 <body>
     <h1>User Management</h1>
     <div id = "UserDeletion">
-        <form method="post">
+        <form action="/delete_other_user" method="post">
             <legend>Delete a User by UserID</legend>
+            <label for="user_id">User ID</label>
+            <input type = "number" name = "user_id" placeholder="Enter User ID" required>
+            <input type ="number" name = "admin_uid" value="{{ uid }}" hidden ="hidden">
+            <input type = "submit" value="Submit">
         </form>
     </div>
     <div id="AdminUserCreation">
