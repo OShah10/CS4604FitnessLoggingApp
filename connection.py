@@ -457,3 +457,6 @@ def reports():
         min_calories=min_calories,
         meals_per_user=meals_per_user
     )
+    if __name__ == '__main__':
+    app.run(debug=True)
+
