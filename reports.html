@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reports</title>
+</head>
+<body>
+    <h1>Health Tracker Reports</h1>
+
+    <p>Total Users: {{ total_users.total_users }}</p>
+    <p>Average Meal Calories: {{ avg_meal_calories.avg_meal_calories }}</p>
+    <p>Total Calories Burned: {{ total_calories_burned.total_calories_burned }}</p>
+    <p>Minimum Meal Calories: {{ min_meal_calories.min_meal_calories }}</p>
+    <p>Maximum Meal Calories: {{ max_meal_calories.max_meal_calories }}</p>
+
+    <h2>Meals Logged By User</h2>
+    <table border="1">
+        <tr>
+            <th>User ID</th>
+            <th>Meal Count</th>
+        </tr>
+        {% for row in meals_by_user %}
+        <tr>
+            <td>{{ row.UserID }}</td>
+            <td>{{ row.meal_count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
