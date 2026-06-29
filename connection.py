@@ -411,3 +411,49 @@ def manage_users(userid):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+@app.route('/reports')
+def reports():
+    conn = mysql.connector.connect(**config)
+    cursor = conn.cursor(dictionary=True)
+
+    # Total users
+    cursor.execute("SELECT COUNT(*) AS total_users FROM Users")
+    total_users = cursor.fetchone()
+
+    # Average meal calories
+    cursor.execute("SELECT AVG(Calories) AS avg_calories FROM Meals")
+    avg_calories = cursor.fetchone()
+
+    # Total calories burned
+    cursor.execute("SELECT SUM(Calories_Burned) AS total_burned FROM Exercises")
+    total_burned = cursor.fetchone()
+
+    # Highest calorie meal
+    cursor.execute("SELECT MAX(Calories) AS max_calories FROM Meals")
+    max_calories = cursor.fetchone()
+
+    # Lowest calorie meal
+    cursor.execute("SELECT MIN(Calories) AS min_calories FROM Meals")
+    min_calories = cursor.fetchone()
+
+    # Meals logged by each user
+    cursor.execute("""
+        SELECT UserID, COUNT(*) AS meal_count
+        FROM Meals
+        GROUP BY UserID
+    """)
+    meals_per_user = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        "reports.html",
+        total_users=total_users,
+        avg_calories=avg_calories,
+        total_burned=total_burned,
+        max_calories=max_calories,
+        min_calories=min_calories,
+        meals_per_user=meals_per_user
+    )
