@@ -56,6 +56,9 @@
         <div>
             <a href = "{{url_for('manage_users', userid = uid)}}"><button type="button">Manage Users</button></a>
         </div>
+        <div style="margin-top: 10px;">
+            <a href = "{{ url_for('reports', userid = uid) }}"><button type="button">View Reports</button></a>
+        </div>
     </div>
 </body>
 </html>

@@ -7,10 +7,10 @@
     <h1>Health Tracker Reports</h1>
 
     <p>Total Users: {{ total_users.total_users }}</p>
-    <p>Average Meal Calories: {{ avg_meal_calories.avg_meal_calories }}</p>
-    <p>Total Calories Burned: {{ total_calories_burned.total_calories_burned }}</p>
-    <p>Minimum Meal Calories: {{ min_meal_calories.min_meal_calories }}</p>
-    <p>Maximum Meal Calories: {{ max_meal_calories.max_meal_calories }}</p>
+    <p>Average Meal Calories: {{ avg_calories.avg_calories }}</p>
+    <p>Total Calories Burned: {{ total_burned.total_burned }}</p>
+    <p>Minimum Meal Calories: {{ min_calories.min_calories }}</p>
+    <p>Maximum Meal Calories: {{ max_calories.max_calories }}</p>
 
     <h2>Meals Logged By User</h2>
     <table border="1">
@@ -18,12 +18,13 @@
             <th>User ID</th>
             <th>Meal Count</th>
         </tr>
-        {% for row in meals_by_user %}
+        {% for row in meals_per_user %}
         <tr>
             <td>{{ row.UserID }}</td>
             <td>{{ row.meal_count }}</td>
         </tr>
         {% endfor %}
     </table>
+    <a href="{{ url_for('admin', userid=uid) }}">Back to Profile</a>
 </body>
 </html>

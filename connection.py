@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 config = {
     'user': 'root',
-    'password': 'AllisonMayaSierra2425!',
+    'password': 'YouWontPass',
     'host': 'localhost',
     'port': '3306',
     'database': 'health_tracker'
@@ -409,11 +409,8 @@ def user(userid):
 def manage_users(userid):
     return render_template('manage_users.html', uid=userid)
 
-if __name__ == '__main__':
-    app.run(debug=True)
-
-@app.route('/reports')
-def reports():
+@app.route('/reports/<userid>')
+def reports(userid):
     conn = mysql.connector.connect(**config)
     cursor = conn.cursor(dictionary=True)
 
@@ -455,8 +452,8 @@ def reports():
         total_burned=total_burned,
         max_calories=max_calories,
         min_calories=min_calories,
-        meals_per_user=meals_per_user
+        meals_per_user=meals_per_user, uid = userid
     )
-    if __name__ == '__main__':
+if __name__ == '__main__':
     app.run(debug=True)
 
